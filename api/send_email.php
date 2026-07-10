@@ -13,7 +13,7 @@ require_once __DIR__ . '/../includes/config.php';
  * Send email using SMTP
  * Falls back to logging if PHPMailer is not installed
  */
-function send_email($to_email, $to_name, $subject, $body, $is_html = false)
+function send_email($to_email, $to_name, $subject, $body, $is_html = false, $attachment_path = null)
 {
     // Check if PHPMailer is available
     $phpmailer_path = __DIR__ . '/../vendor/autoload.php';
@@ -47,6 +47,10 @@ function send_email($to_email, $to_name, $subject, $body, $is_html = false)
                 $mail->AltBody = strip_tags($body);
             }
 
+            if ($attachment_path && file_exists($attachment_path)) {
+                $mail->addAttachment($attachment_path);
+            }
+
             $mail->send();
             return true;
         } catch (Exception $e) {
@@ -76,6 +80,7 @@ To: {$to_name} <{$to_email}>
 Subject: {$subject}
 ----------------------------------------
 {$body}
+Attachment: " . ($attachment_path ? $attachment_path : 'None') . "
 ========================================
 
 ";
