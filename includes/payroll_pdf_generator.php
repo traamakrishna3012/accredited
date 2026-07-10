@@ -117,11 +117,11 @@ function generate_payslip_pdf($pdo, $payslip_id, &$filename_out = null) {
                 <th>Date of Joining</th>
                 <td>' . ($emp['doj'] ? date('d-M-Y', strtotime($emp['doj'])) : '') . '</td>
                 <th>UAN / PF No</th>
-                <td>' . htmlspecialchars($emp['uan']) . ' / ' . htmlspecialchars($emp['pf_no']) . '</td>
+                <td>' . htmlspecialchars($emp['uan_no']) . ' / ' . htmlspecialchars($emp['pf_no']) . '</td>
             </tr>
             <tr>
                 <th>PAN</th>
-                <td>' . htmlspecialchars($emp['pan']) . '</td>
+                <td>' . htmlspecialchars($emp['pan_no']) . '</td>
                 <th>ESIC No</th>
                 <td>' . htmlspecialchars($emp['esic_no']) . '</td>
             </tr>
@@ -132,10 +132,16 @@ function generate_payslip_pdf($pdo, $payslip_id, &$filename_out = null) {
                 <td>' . htmlspecialchars($emp['bank_account']) . '</td>
             </tr>
             <tr>
-                <th>Total Working Days</th>
-                <td>' . $payslip['standard_working_days'] . '</td>
+                <th>Standard Days</th>
+                <td>' . ($payslip['standard_days'] > 0 ? $payslip['standard_days'] : $payslip['standard_working_days']) . '</td>
                 <th>Paid Days / LOP</th>
                 <td>' . $payslip['work_days'] . ' / ' . $payslip['lop_days'] . '</td>
+            </tr>
+            <tr>
+                <th>Previous Month LOP Days</th>
+                <td>' . $payslip['prev_month_lop'] . '</td>
+                <th>LOP Reversal Days</th>
+                <td>' . $payslip['lop_reversal'] . '</td>
             </tr>
         </table>
 

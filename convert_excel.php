@@ -7,7 +7,8 @@ require_once __DIR__ . '/includes/SimpleXLSXGen.php';
 $stmt = $pdo->query("SELECT * FROM payroll_salary_components ORDER BY type DESC, id ASC");
 $db_components = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$headers = ['Emp_Code', 'Work_Days', 'LOP_Days'];
+// 1. Output Headers for Bulk Upload (must match what payroll_upload_process.php expects)
+$headers = ['Emp_Code', 'Employee_Name', 'Location', 'Designation', 'Bank_Name', 'Bank_Account', 'DOJ', 'PAN', 'PF_No', 'PF_UAN', 'ESIC_No', 'Work_Days', 'LOP_Days', 'Standard_Days', 'Prev_Month_LOP', 'LOP_Reversal'];
 $comp_map = []; // lowercase name to exact name
 foreach ($db_components as $comp) {
     $headers[] = $comp['name'];
@@ -42,9 +43,22 @@ foreach ($rows as $row) {
         // Save previous employee
         if ($current_emp !== null) {
             $out_row = [
-                $current_emp['Emp_Code'],
-                $current_emp['Work_Days'],
-                $current_emp['LOP_Days']
+                $current_emp['info']['Emp_Code'] ?? '',
+                $current_emp['info']['Employee_Name'] ?? '',
+                $current_emp['info']['Location'] ?? '',
+                $current_emp['info']['Designation'] ?? '',
+                $current_emp['info']['Bank_Name'] ?? '',
+                $current_emp['info']['Bank_Account'] ?? '',
+                $current_emp['info']['DOJ'] ?? '',
+                $current_emp['info']['PAN'] ?? '',
+                $current_emp['info']['PF_No'] ?? '',
+                $current_emp['info']['PF_UAN'] ?? '',
+                $current_emp['info']['ESIC_No'] ?? '',
+                $current_emp['info']['Work_Days'] ?? '0',
+                $current_emp['info']['LOP_Days'] ?? '0',
+                $current_emp['info']['Standard_Days'] ?? '0',
+                $current_emp['info']['Prev_Month_LOP'] ?? '0',
+                $current_emp['info']['LOP_Reversal'] ?? '0',
             ];
             foreach ($db_components as $comp) {
                 $out_row[] = $current_emp['components'][$comp['name']] ?? '';
@@ -54,9 +68,24 @@ foreach ($rows as $row) {
 
         // Start new employee
         $current_emp = [
-            'Emp_Code' => trim($row[2] ?? ''),
-            'Work_Days' => 0,
-            'LOP_Days' => 0,
+            'info' => [
+                'Emp_Code' => trim($row[2] ?? ''),
+                'Employee_Name' => '',
+                'Location' => '',
+                'Designation' => '',
+                'Bank_Name' => '',
+                'Bank_Account' => '',
+                'DOJ' => '',
+                'PAN' => '',
+                'PF_No' => '',
+                'PF_UAN' => '',
+                'ESIC_No' => '',
+                'Work_Days' => 0,
+                'LOP_Days' => 0,
+                'Standard_Days' => 0,
+                'Prev_Month_LOP' => 0,
+                'LOP_Reversal' => 0
+            ],
             'components' => []
         ];
     }
@@ -64,12 +93,36 @@ foreach ($rows as $row) {
     if ($current_emp !== null) {
         // Extract Work Days
         if (isset($row[3]) && trim($row[3]) === 'Work Days') {
-            $current_emp['Work_Days'] = trim($row[5] ?? '');
+            $current_emp['info']['Work_Days'] = trim($row[5] ?? '');
         }
         // Extract LOP Days
         if (isset($row[3]) && trim($row[3]) === 'LOP Days') {
-            $current_emp['LOP_Days'] = trim($row[5] ?? '');
+            $current_emp['info']['LOP_Days'] = trim($row[5] ?? '');
         }
+        // Extract Standard Days
+        if (isset($row[1]) && trim($row[1]) === 'Standard days') {
+            $current_emp['info']['Standard_Days'] = trim($row[2] ?? '');
+        }
+        // Extract Previous Month LOP Days
+        if (isset($row[1]) && trim($row[1]) === 'Previous Month LOP Days') {
+            $current_emp['info']['Prev_Month_LOP'] = trim($row[2] ?? '');
+        }
+        // Extract LOP Reversal Days
+        if (isset($row[3]) && trim($row[3]) === 'LOP Reversal Days') {
+            $current_emp['info']['LOP_Reversal'] = trim($row[5] ?? '');
+        }
+        
+        // Extract Other Info
+        if (isset($row[3]) && trim($row[3]) === 'Employee Name') $current_emp['info']['Employee_Name'] = trim($row[5] ?? '');
+        if (isset($row[1]) && trim($row[1]) === 'Bank Name') $current_emp['info']['Bank_Name'] = trim($row[2] ?? '');
+        if (isset($row[3]) && trim($row[3]) === 'Bank A/C No') $current_emp['info']['Bank_Account'] = trim($row[5] ?? '');
+        if (isset($row[1]) && trim($row[1]) === 'DOJ') $current_emp['info']['DOJ'] = trim($row[2] ?? '');
+        if (isset($row[3]) && trim($row[3]) === 'PAN') $current_emp['info']['PAN'] = trim($row[5] ?? '');
+        if (isset($row[1]) && trim($row[1]) === 'PF No.') $current_emp['info']['PF_No'] = trim($row[2] ?? '');
+        if (isset($row[3]) && trim($row[3]) === 'PF UAN') $current_emp['info']['PF_UAN'] = trim($row[5] ?? '');
+        if (isset($row[1]) && trim($row[1]) === 'Location') $current_emp['info']['Location'] = trim($row[2] ?? '');
+        if (isset($row[3]) && trim($row[3]) === 'ESIC No') $current_emp['info']['ESIC_No'] = trim($row[5] ?? '');
+        if (isset($row[1]) && trim($row[1]) === 'Designation') $current_emp['info']['Designation'] = trim($row[2] ?? '');
 
         // Extract Earnings (Col 1 = Name, Col 2 = Standard Amount)
         if (isset($row[1]) && trim($row[1]) !== '' && trim($row[1]) !== 'Employee Code' && trim($row[1]) !== 'Bank Name' && trim($row[1]) !== 'DOJ' && trim($row[1]) !== 'PF No.' && trim($row[1]) !== 'Location' && trim($row[1]) !== 'Designation' && trim($row[1]) !== 'Standard days' && trim($row[1]) !== 'Previous Month LOP Days' && trim($row[1]) !== 'Components' && trim($row[1]) !== 'Total Earnings' && trim($row[1]) !== 'Amount in words') {
@@ -161,9 +214,22 @@ foreach ($rows as $row) {
 // Push last employee
 if ($current_emp !== null) {
     $out_row = [
-        $current_emp['Emp_Code'],
-        $current_emp['Work_Days'],
-        $current_emp['LOP_Days']
+        $current_emp['info']['Emp_Code'] ?? '',
+        $current_emp['info']['Employee_Name'] ?? '',
+        $current_emp['info']['Location'] ?? '',
+        $current_emp['info']['Designation'] ?? '',
+        $current_emp['info']['Bank_Name'] ?? '',
+        $current_emp['info']['Bank_Account'] ?? '',
+        $current_emp['info']['DOJ'] ?? '',
+        $current_emp['info']['PAN'] ?? '',
+        $current_emp['info']['PF_No'] ?? '',
+        $current_emp['info']['PF_UAN'] ?? '',
+        $current_emp['info']['ESIC_No'] ?? '',
+        $current_emp['info']['Work_Days'] ?? '0',
+        $current_emp['info']['LOP_Days'] ?? '0',
+        $current_emp['info']['Standard_Days'] ?? '0',
+        $current_emp['info']['Prev_Month_LOP'] ?? '0',
+        $current_emp['info']['LOP_Reversal'] ?? '0',
     ];
     foreach ($db_components as $comp) {
         $out_row[] = $current_emp['components'][$comp['name']] ?? '';
@@ -175,7 +241,7 @@ if ($current_emp !== null) {
 // We must prepend the headers to the output_data array so that any new dynamically added components are included!
 array_unshift($output_data, $headers);
 $out_xlsx = Shuchkin\SimpleXLSXGen::fromArray($output_data);
-$output_file = 'C:\Users\trama\Downloads\bulk_upload_formatted.xlsx';
+$output_file = 'C:\Users\trama\Downloads\bulk_upload_final_june_v2.xlsx';
 $out_xlsx->saveAs($output_file);
 
 echo "Successfully converted to: " . $output_file . "\n";

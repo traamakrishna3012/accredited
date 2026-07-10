@@ -53,11 +53,19 @@ if (empty($rows)) {
 
 $header = array_shift($rows);
 
-if (!$header || $header[0] !== 'Emp_Code' || $header[1] !== 'Work_Days' || $header[2] !== 'LOP_Days') {
-    set_flash_message('danger', 'Invalid file format. Please use the provided template (Emp_Code, Work_Days, LOP_Days).');
+if (!$header || !in_array('Emp_Code', $header) || !in_array('Work_Days', $header) || !in_array('LOP_Days', $header)) {
+    set_flash_message('danger', 'Invalid file format. Please use the provided template or ensure Emp_Code, Work_Days, and LOP_Days columns exist.');
     header("Location: payroll_upload.php");
     exit;
 }
+
+$col_idx = array_flip($header);
+$idx_emp = $col_idx['Emp_Code'];
+$idx_work = $col_idx['Work_Days'];
+$idx_lop = $col_idx['LOP_Days'];
+$idx_std = $col_idx['Standard_Days'] ?? -1;
+$idx_prev = $col_idx['Prev_Month_LOP'] ?? -1;
+$idx_rev = $col_idx['LOP_Reversal'] ?? -1;
 
 // Map header columns to component IDs
 $components = get_payroll_components($pdo);
@@ -69,8 +77,11 @@ foreach ($components as $c) {
 }
 
 $header_comps = [];
-for ($i = 3; $i < count($header); $i++) {
+for ($i = 0; $i < count($header); $i++) {
     $h = trim($header[$i]);
+    if (in_array($h, ['Emp_Code', 'Employee_Name', 'Location', 'Designation', 'Bank_Name', 'Bank_Account', 'DOJ', 'PAN', 'PF_No', 'PF_UAN', 'ESIC_No', 'Work_Days', 'LOP_Days', 'Standard_Days', 'Prev_Month_LOP', 'LOP_Reversal'])) {
+        continue;
+    }
     if (isset($comp_map[$h])) {
         $header_comps[$i] = $comp_map[$h];
     }
@@ -90,7 +101,7 @@ foreach ($rows as $row) {
     $row_num++;
     if (empty(array_filter($row))) continue; // skip empty rows
 
-    $emp_code = trim($row[0] ?? '');
+    $emp_code = trim($row[$idx_emp] ?? '');
     if (empty($emp_code)) continue;
 
     if (!isset($employees[$emp_code])) {
@@ -99,8 +110,8 @@ foreach ($rows as $row) {
     }
 
     $emp = $employees[$emp_code];
-    $work_days = (float)($row[1] ?? 0);
-    $lop_days = (float)($row[2] ?? 0);
+    $work_days = (float)($row[$idx_work] ?? 0);
+    $lop_days = (float)($row[$idx_lop] ?? 0);
 
     if ($work_days + $lop_days > $standard_days) {
         $errors[] = "Row $row_num: Work Days + LOP Days exceeds Standard Days ($standard_days) for $emp_code.";
@@ -143,6 +154,9 @@ foreach ($rows as $row) {
         'name' => $emp['name'],
         'work_days' => $work_days,
         'lop_days' => $lop_days,
+        'standard_days' => ($idx_std >= 0 && isset($row[$idx_std]) && is_numeric(trim($row[$idx_std]))) ? (float)trim($row[$idx_std]) : 0,
+        'prev_month_lop' => ($idx_prev >= 0 && isset($row[$idx_prev]) && is_numeric(trim($row[$idx_prev]))) ? (float)trim($row[$idx_prev]) : 0,
+        'lop_reversal' => ($idx_rev >= 0 && isset($row[$idx_rev]) && is_numeric(trim($row[$idx_rev]))) ? (float)trim($row[$idx_rev]) : 0,
         'earnings' => $calc_results['total_earnings'],
         'deductions' => $calc_results['total_deductions'],
         'net_pay' => $calc_results['net_pay'],

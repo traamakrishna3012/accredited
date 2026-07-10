@@ -36,8 +36,8 @@ try {
     // 3. Prepare insert statements
     $stmt_payslip = $pdo->prepare("
         INSERT INTO payroll_payslips 
-        (batch_id, employee_id, work_days, lop_days, total_earnings, total_deductions, net_pay) 
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        (batch_id, employee_id, work_days, lop_days, standard_days, prev_month_lop, lop_reversal, total_earnings, total_deductions, net_pay) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
 
     $stmt_item = $pdo->prepare("
@@ -49,12 +49,15 @@ try {
     // 4. Insert records
     foreach ($data as $emp) {
         $stmt_payslip->execute([
-            $batch_id,
-            $emp['employee_id'],
-            $emp['work_days'],
-            $emp['lop_days'],
-            $emp['earnings'],
-            $emp['deductions'],
+            $batch_id, 
+            $emp['employee_id'], 
+            $emp['work_days'], 
+            $emp['lop_days'], 
+            $emp['standard_days'],
+            $emp['prev_month_lop'],
+            $emp['lop_reversal'],
+            $emp['earnings'], 
+            $emp['deductions'], 
             $emp['net_pay']
         ]);
         $payslip_id = $pdo->lastInsertId();
