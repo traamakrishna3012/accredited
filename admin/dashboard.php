@@ -75,6 +75,29 @@ $services_count = $stmt->fetch()['count'];
             </ul>
 
             <hr class="border-secondary my-4">
+            
+            <div class="text-white mb-2 px-3">
+                <small class="opacity-75 text-uppercase fw-bold" style="font-size: 0.75rem;">Payroll</small>
+            </div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link" href="payroll_batches.php">
+                        <i class="bi bi-files"></i> Batches
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="payroll_upload.php">
+                        <i class="bi bi-cloud-upload"></i> Bulk Upload
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="payroll_employees.php">
+                        <i class="bi bi-people"></i> Employees
+                    </a>
+                </li>
+            </ul>
+
+            <hr class="border-secondary my-4">
 
             <ul class="nav flex-column">
                 <li class="nav-item">
