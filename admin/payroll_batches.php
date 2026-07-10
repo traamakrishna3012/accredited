@@ -9,41 +9,16 @@ require_once __DIR__ . '/../includes/payroll_functions.php';
 // Fetch all batches
 $stmt = $pdo->query("SELECT * FROM payroll_batches ORDER BY month DESC, created_at DESC");
 $batches = $stmt->fetchAll();
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <?php include __DIR__ . '/admin_head.php'; ?>
     <title>Payroll Batches | Admin</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="<?php echo BASE_URL ?? ''; ?>/assets/css/style.css" rel="stylesheet">
 </head>
 <body class="bg-light">
     <div class="d-flex">
-        <!-- Sidebar -->
-        <div class="admin-sidebar bg-dark text-white p-3" style="width: 250px; min-height: 100vh;">
-            <div class="mb-4">
-                <h5 class="mb-0 text-white">Admin Panel</h5>
-                <small class="opacity-75"><?php echo SITE_NAME ?? 'Accredited'; ?></small>
-            </div>
-            <ul class="nav flex-column gap-2">
-                <li class="nav-item">
-                    <a class="nav-link text-white" href="dashboard.php"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white" href="payroll_employees.php"><i class="bi bi-people me-2"></i> Employees (Payroll)</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white" href="payroll_upload.php"><i class="bi bi-cloud-upload me-2"></i> Bulk Upload</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white active bg-primary rounded" href="payroll_batches.php"><i class="bi bi-files me-2"></i> Payroll Batches</a>
-                </li>
-            </ul>
-        </div>
+        <?php include __DIR__ . '/admin_sidebar.php'; ?>
 
         <!-- Main Content -->
         <div class="flex-grow-1">

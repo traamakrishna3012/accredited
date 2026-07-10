@@ -80,77 +80,13 @@ $icons = [
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="robots" content="noindex, nofollow">
+    <?php include __DIR__ . '/admin_head.php'; ?>
     <title>Services | Admin Panel</title>
-
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="<?php echo BASE_URL; ?>/assets/images/Agency_Logo.svg">
-    <link rel="alternate icon" type="image/x-icon" href="<?php echo BASE_URL; ?>/assets/images/favicon.ico">
-    <link rel="shortcut icon" href="<?php echo BASE_URL; ?>/assets/images/favicon.ico">
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="<?php echo BASE_URL; ?>/assets/css/style.css" rel="stylesheet">
 </head>
 
 <body class="bg-light">
     <div class="d-flex">
-        <!-- Sidebar -->
-        <div class="admin-sidebar" style="width: 250px;">
-            <div class="text-white mb-4">
-                <h5 class="mb-0 text-white">Admin Panel</h5>
-                <small class="opacity-75"><?php echo SITE_NAME; ?></small>
-            </div>
-
-            <ul class="nav flex-column">
-                <li class="nav-item">
-                    <a class="nav-link <?php echo $admin_page == 'dashboard' ? 'active' : ''; ?>" href="dashboard.php">
-                        <i class="bi bi-speedometer2"></i> Dashboard
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link <?php echo $admin_page == 'inquiries' ? 'active' : ''; ?>" href="inquiries.php">
-                        <i class="bi bi-envelope"></i> Inquiries
-                        <?php if ($inquiry_counts['new_count'] > 0): ?>
-                            <span class="badge bg-danger ms-auto"><?php echo $inquiry_counts['new_count']; ?></span>
-                        <?php endif; ?>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link <?php echo $admin_page == 'services' ? 'active' : ''; ?>" href="services.php">
-                        <i class="bi bi-grid"></i> Services
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link <?php echo $admin_page == 'jobs' ? 'active' : ''; ?>" href="jobs.php">
-                        <i class="bi bi-briefcase"></i> Jobs
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link <?php echo $admin_page == 'settings' ? 'active' : ''; ?>" href="settings.php">
-                        <i class="bi bi-gear"></i> Settings
-                    </a>
-                </li>
-            </ul>
-
-            <hr class="border-secondary my-4">
-
-            <ul class="nav flex-column">
-                <li class="nav-item">
-                    <a class="nav-link" href="<?php echo BASE_URL; ?>/" target="_blank">
-                        <i class="bi bi-globe"></i> View Website
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="logout.php">
-                        <i class="bi bi-box-arrow-left"></i> Logout
-                    </a>
-                </li>
-            </ul>
-        </div>
+        <?php include __DIR__ . '/admin_sidebar.php'; ?>
 
         <!-- Main Content -->
         <div class="flex-grow-1">

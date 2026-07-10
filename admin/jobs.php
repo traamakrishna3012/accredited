@@ -96,69 +96,16 @@ $page_title = 'Manage Jobs';
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <?php include __DIR__ . '/admin_head.php'; ?>
     <title><?php echo $page_title; ?> | Admin - <?php echo SITE_NAME; ?></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="<?php echo BASE_URL; ?>/assets/css/style.css" rel="stylesheet">
 </head>
 
-<body>
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="col-md-3 col-lg-2 admin-sidebar">
-                <div class="text-white mb-4">
-                    <h5>Admin Panel</h5>
-                    <small class="opacity-50">Welcome, <?php echo $_SESSION['admin_username']; ?></small>
-                </div>
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link" href="dashboard.php">
-                            <i class="bi bi-speedometer2"></i> Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="inquiries.php">
-                            <i class="bi bi-envelope"></i> Inquiries
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="services.php">
-                            <i class="bi bi-grid"></i> Services
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="jobs.php">
-                            <i class="bi bi-briefcase"></i> Jobs
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="settings.php">
-                            <i class="bi bi-gear"></i> Settings
-                        </a>
-                    </li>
-                </ul>
-
-                <hr class="border-secondary my-4">
-
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?php echo BASE_URL; ?>/" target="_blank">
-                            <i class="bi bi-globe"></i> View Website
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="logout.php">
-                            <i class="bi bi-box-arrow-left"></i> Logout
-                        </a>
-                    </li>
-                </ul>
-            </div>
+<body class="bg-light">
+    <div class="d-flex">
+        <?php include __DIR__ . '/admin_sidebar.php'; ?>
 
             <!-- Main Content -->
-            <div class="col-md-9 col-lg-10 p-4">
+            <div class="flex-grow-1 p-4" style="max-width: calc(100vw - 250px);">
                 <?php $flash = get_flash_message();
                 if ($flash): ?>
                     <div

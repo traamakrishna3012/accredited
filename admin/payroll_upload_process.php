@@ -124,17 +124,21 @@ fclose($file);
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <?php include __DIR__ . '/admin_head.php'; ?>
     <title>Preview Upload | Admin</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 </head>
-<body class="bg-light p-4">
-    <div class="container-fluid bg-white p-4 shadow-sm rounded">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="mb-0">Upload Preview (<?php echo htmlspecialchars($month); ?>)</h4>
-            <a href="payroll_upload.php" class="btn btn-outline-secondary">Cancel</a>
-        </div>
+<body class="bg-light">
+    <div class="d-flex">
+        <?php include __DIR__ . '/admin_sidebar.php'; ?>
+
+        <!-- Main Content -->
+        <div class="flex-grow-1">
+            <div class="bg-white border-bottom px-4 py-3 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Upload Preview (<?php echo htmlspecialchars($month); ?>)</h5>
+                <a href="payroll_upload.php" class="btn btn-outline-secondary btn-sm">Cancel</a>
+            </div>
+
+            <div class="p-4">
 
         <?php if (!empty($errors)): ?>
             <div class="alert alert-danger">
@@ -195,6 +199,10 @@ fclose($file);
                 </button>
             </form>
         <?php endif; ?>
+            </div>
+        </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
