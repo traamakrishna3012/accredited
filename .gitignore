@@ -1,0 +1,33 @@
+# Environment files
+.env
+.env.local
+
+# IDEs and Text Editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# macOS
+.DS_Store
+
+# PHP Composer
+vendor/
+
+# Temporary and Log files
+logs/
+*.log
+*.zip
+tmp/
+temp/
+*.pdf
+
+# System Data
+thumbs.db
+
+# Do not track local user uploads/exports in the repo unless intended
+uploads/
+exports/
