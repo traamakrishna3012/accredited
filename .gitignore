@@ -36,3 +36,7 @@ exports/
 check_excel.php
 generate_sample_pdf.php
 install_dompdf.php
+
+# SSH Keys and secrets
+*.key
+*.key.pub
