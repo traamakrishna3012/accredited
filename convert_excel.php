@@ -34,7 +34,9 @@ $alias_map = [
     'house rent allowance' => 'HRA',
     'conveyance' => 'Conveyance Allowance',
     'basic salary' => 'Basic Salary',
-    'provident fund' => 'PF Contribution'
+    'provident fund' => 'PF Contribution',
+    'esi' => 'ESIC Contribution',
+    'esic' => 'ESIC Contribution'
 ];
 
 foreach ($rows as $row) {
