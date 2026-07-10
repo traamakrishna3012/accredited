@@ -67,26 +67,29 @@ function save_payroll_employee($pdo, $data, $structure)
         if (empty($data['id'])) {
             $stmt = $pdo->prepare("
                 INSERT INTO payroll_employees 
-                (emp_code, name, designation, location, doj, bank_name, bank_account, pan_no, pf_no, uan_no, esic_no, email, status) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (emp_code, name, designation, location, doj, bank_name, bank_account, pan_no, pf_no, uan_no, esic_no, email, status, standard_days, prev_month_lop, lop_reversal) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
             $stmt->execute([
                 $data['emp_code'], $data['name'], $data['designation'], $data['location'], 
                 $data['doj'] ?: null, $data['bank_name'], $data['bank_account'], $data['pan_no'], 
-                $data['pf_no'], $data['uan_no'], $data['esic_no'], $data['email'], $data['status']
+                $data['pf_no'], $data['uan_no'], $data['esic_no'], $data['email'], $data['status'],
+                $data['standard_days'] ?? 0, $data['prev_month_lop'] ?? 0, $data['lop_reversal'] ?? 0
             ]);
             $employee_id = $pdo->lastInsertId();
         } else {
             $stmt = $pdo->prepare("
                 UPDATE payroll_employees SET 
                 emp_code = ?, name = ?, designation = ?, location = ?, doj = ?, bank_name = ?, 
-                bank_account = ?, pan_no = ?, pf_no = ?, uan_no = ?, esic_no = ?, email = ?, status = ?
+                bank_account = ?, pan_no = ?, pf_no = ?, uan_no = ?, esic_no = ?, email = ?, status = ?,
+                standard_days = ?, prev_month_lop = ?, lop_reversal = ?
                 WHERE id = ?
             ");
             $stmt->execute([
                 $data['emp_code'], $data['name'], $data['designation'], $data['location'], 
                 $data['doj'] ?: null, $data['bank_name'], $data['bank_account'], $data['pan_no'], 
                 $data['pf_no'], $data['uan_no'], $data['esic_no'], $data['email'], $data['status'],
+                $data['standard_days'] ?? 0, $data['prev_month_lop'] ?? 0, $data['lop_reversal'] ?? 0,
                 $data['id']
             ]);
             $employee_id = $data['id'];

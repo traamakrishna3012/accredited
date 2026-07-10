@@ -49,6 +49,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'esic_no' => sanitize_input($_POST['esic_no'] ?? ''),
         'email' => sanitize_input($_POST['email'] ?? ''),
         'status' => sanitize_input($_POST['status'] ?? 'active'),
+        'standard_days' => isset($_POST['standard_days']) && is_numeric($_POST['standard_days']) ? (float)$_POST['standard_days'] : 0,
+        'prev_month_lop' => isset($_POST['prev_month_lop']) && is_numeric($_POST['prev_month_lop']) ? (float)$_POST['prev_month_lop'] : 0,
+        'lop_reversal' => isset($_POST['lop_reversal']) && is_numeric($_POST['lop_reversal']) ? (float)$_POST['lop_reversal'] : 0,
     ];
 
     $comp_data = $_POST['components'] ?? [];
@@ -164,6 +167,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <div class="col-md-6">
                                             <label class="form-label">Bank Account Number</label>
                                             <input type="text" name="bank_account" class="form-control" value="<?php echo htmlspecialchars($employee['bank_account'] ?? ''); ?>">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Monthly Default Details -->
+                            <div class="card shadow-sm border-0 mt-4">
+                                <div class="card-header bg-white py-3">
+                                    <h6 class="mb-0 fw-bold">Monthly Defaults (Leaves & Standard Days)</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label">Default Standard Days</label>
+                                            <input type="number" step="0.5" name="standard_days" class="form-control" value="<?php echo htmlspecialchars($employee['standard_days'] ?? '0'); ?>">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Default Prev Month LOP</label>
+                                            <input type="number" step="0.5" name="prev_month_lop" class="form-control" value="<?php echo htmlspecialchars($employee['prev_month_lop'] ?? '0'); ?>">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Default LOP Reversal</label>
+                                            <input type="number" step="0.5" name="lop_reversal" class="form-control" value="<?php echo htmlspecialchars($employee['lop_reversal'] ?? '0'); ?>">
                                         </div>
                                     </div>
                                 </div>
