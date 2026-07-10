@@ -74,6 +74,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $error_message = 'Failed to change password.';
                 }
             }
+        } elseif ($action === 'update_assets') {
+            $upload_dir = __DIR__ . '/../uploads/settings/';
+            if (!file_exists($upload_dir)) {
+                mkdir($upload_dir, 0777, true);
+            }
+            
+            $asset_updated = false;
+            
+            // Handle Logo Upload
+            if (isset($_FILES['company_logo']) && $_FILES['company_logo']['error'] === UPLOAD_ERR_OK) {
+                $tmp_name = $_FILES['company_logo']['tmp_name'];
+                $name = basename($_FILES['company_logo']['name']);
+                $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+                if (in_array($ext, ['jpg', 'jpeg', 'png'])) {
+                    move_uploaded_file($tmp_name, $upload_dir . 'company_logo.png');
+                    $asset_updated = true;
+                } else {
+                    $error_message = 'Logo must be JPG or PNG.';
+                }
+            }
+            
+            // Handle Digital Seal Upload
+            if (isset($_FILES['digital_seal']) && $_FILES['digital_seal']['error'] === UPLOAD_ERR_OK) {
+                $tmp_name = $_FILES['digital_seal']['tmp_name'];
+                $name = basename($_FILES['digital_seal']['name']);
+                $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+                if (in_array($ext, ['jpg', 'jpeg', 'png'])) {
+                    move_uploaded_file($tmp_name, $upload_dir . 'digital_seal.png');
+                    $asset_updated = true;
+                } else {
+                    $error_message = 'Digital seal must be JPG or PNG.';
+                }
+            }
+            
+            if ($asset_updated) {
+                $success_message = 'Company assets updated successfully!';
+            } elseif (empty($error_message)) {
+                $error_message = 'No valid files were uploaded.';
+            }
         }
     }
 }
@@ -199,6 +238,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                                     <button type="submit" class="btn btn-warning">
                                         <i class="bi bi-key me-2"></i>Change Password
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Company Assets Settings -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header bg-white">
+                                <h6 class="mb-0"><i class="bi bi-images me-2"></i>Company Assets (For Payroll PDFs)</h6>
+                            </div>
+                            <div class="card-body">
+                                <form method="POST" enctype="multipart/form-data">
+                                    <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
+                                    <input type="hidden" name="action" value="update_assets">
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Company Logo</label>
+                                            <input type="file" class="form-control" name="company_logo" accept="image/png, image/jpeg">
+                                            <small class="text-muted">Displays in the top-left corner of the payslip.</small>
+                                            <?php if (file_exists(__DIR__ . '/../uploads/settings/company_logo.png')): ?>
+                                                <div class="mt-2">
+                                                    <img src="../uploads/settings/company_logo.png?v=<?php echo time(); ?>" alt="Logo" class="img-thumbnail" style="max-height: 80px;">
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                        
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Digital Seal & Signature</label>
+                                            <input type="file" class="form-control" name="digital_seal" accept="image/png, image/jpeg">
+                                            <small class="text-muted">Displays above the 'Authorized Signatory' in the footer.</small>
+                                            <?php if (file_exists(__DIR__ . '/../uploads/settings/digital_seal.png')): ?>
+                                                <div class="mt-2">
+                                                    <img src="../uploads/settings/digital_seal.png?v=<?php echo time(); ?>" alt="Seal" class="img-thumbnail" style="max-height: 80px;">
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-upload me-2"></i>Upload Assets
                                     </button>
                                 </form>
                             </div>

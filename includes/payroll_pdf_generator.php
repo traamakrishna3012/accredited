@@ -61,7 +61,7 @@ function generate_payslip_pdf($pdo, $payslip_id, &$filename_out = null) {
     <head>
         <meta charset="utf-8">
         <style>
-            body { font-family: "Helvetica", "Arial", sans-serif; font-size: 11px; color: #333; }
+            body { font-family: "DejaVu Sans", sans-serif; font-size: 11px; color: #333; }
             .text-center { text-align: center; }
             .text-right { text-align: right; }
             .fw-bold { font-weight: bold; }
@@ -94,7 +94,8 @@ function generate_payslip_pdf($pdo, $payslip_id, &$filename_out = null) {
         </style>
     </head>
     <body>
-        <div class="company-header text-center">
+        <div class="company-header text-center" style="position: relative;">
+            ' . (file_exists(__DIR__ . '/../uploads/settings/company_logo.png') ? '<img src="' . __DIR__ . '/../uploads/settings/company_logo.png" style="max-height: 40px; position: absolute; left: 0; top: 0;">' : '') . '
             <div class="company-title">' . htmlspecialchars($site_name) . '</div>
             <div>Payslip for the month of ' . $month_formatted . '</div>
         </div>
@@ -189,7 +190,7 @@ function generate_payslip_pdf($pdo, $payslip_id, &$filename_out = null) {
             </tr>
             <tr class="fw-bold">
                 <td colspan="4" class="text-right">NET PAY</td>
-                <td colspan="2" class="text-right" style="font-size: 14px;">Rs. ' . number_format($payslip['net_pay'], 2) . '</td>
+                <td colspan="2" class="text-right" style="font-size: 14px;">&#8377; ' . number_format($payslip['net_pay'], 2) . '</td>
             </tr>
         </table>
 
@@ -203,6 +204,8 @@ function generate_payslip_pdf($pdo, $payslip_id, &$filename_out = null) {
         </div>
         
         <div class="signature-box">
+            ' . (file_exists(__DIR__ . '/../uploads/settings/digital_seal.png') ? '<img src="' . __DIR__ . '/../uploads/settings/digital_seal.png" style="max-height: 50px; display: block; float: right; margin-bottom: 5px;">' : '') . '
+            <div style="clear: both;"></div>
             <div>_______________________</div>
             <div style="margin-top: 5px;">Authorized Signatory</div>
         </div>
@@ -212,7 +215,7 @@ function generate_payslip_pdf($pdo, $payslip_id, &$filename_out = null) {
     // Initialize Dompdf
     $options = new Options();
     $options->set('isRemoteEnabled', true);
-    $options->set('defaultFont', 'Helvetica');
+    $options->set('defaultFont', 'DejaVu Sans');
     $dompdf = new Dompdf($options);
 
     $dompdf->loadHtml($html);

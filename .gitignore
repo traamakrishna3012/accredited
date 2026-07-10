@@ -31,3 +31,8 @@ thumbs.db
 # Do not track local user uploads/exports in the repo unless intended
 uploads/
 exports/
+
+# Temporary test scripts created during development
+check_excel.php
+generate_sample_pdf.php
+install_dompdf.php
