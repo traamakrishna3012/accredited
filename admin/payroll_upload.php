@@ -37,9 +37,9 @@ require_once __DIR__ . '/../includes/payroll_functions.php';
                         <div class="card shadow-sm border-0 mb-4">
                             <div class="card-body p-4">
                                 <h5 class="card-title fw-bold mb-3"><i class="bi bi-1-circle text-primary me-2"></i>Step 1: Download Template</h5>
-                                <p class="text-muted">Download the dynamic CSV template. It automatically includes columns for all active salary components.</p>
+                                <p class="text-muted">Download the dynamic XLSX template. It automatically includes columns for all active salary components.</p>
                                 <a href="payroll_download_template.php" class="btn btn-outline-primary">
-                                    <i class="bi bi-download me-2"></i>Download CSV Template
+                                    <i class="bi bi-download me-2"></i>Download XLSX Template
                                 </a>
                             </div>
                         </div>
@@ -62,8 +62,8 @@ require_once __DIR__ . '/../includes/payroll_functions.php';
                                         <input type="number" name="standard_days" class="form-control" step="0.5" required value="30">
                                     </div>
                                     <div class="mb-4">
-                                        <label class="form-label fw-semibold">Upload CSV File</label>
-                                        <input type="file" name="csv_file" class="form-control" accept=".csv" required>
+                                        <label class="form-label fw-semibold">Upload File (.csv or .xlsx)</label>
+                                        <input type="file" name="csv_file" class="form-control" accept=".csv, .xlsx" required>
                                     </div>
                                     
                                     <button type="submit" class="btn btn-primary w-100">

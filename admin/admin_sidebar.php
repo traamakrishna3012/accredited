@@ -24,7 +24,7 @@ $is_payroll_page = in_array($admin_page, [
 ]);
 ?>
 <!-- Sidebar -->
-<div class="admin-sidebar" style="width: 250px;">
+<div class="admin-sidebar flex-shrink-0" style="width: 250px; min-height: 100vh;">
     <div class="text-white mb-4">
         <h5 class="mb-0 text-white">Admin Panel</h5>
         <small class="opacity-75"><?php echo SITE_NAME; ?></small>

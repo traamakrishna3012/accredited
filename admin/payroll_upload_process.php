@@ -20,11 +20,41 @@ if (empty($_FILES['csv_file']['tmp_name'])) {
     exit;
 }
 
-$file = fopen($_FILES['csv_file']['tmp_name'], 'r');
-$header = fgetcsv($file);
+$file_name = $_FILES['csv_file']['name'];
+$file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+$tmp_name = $_FILES['csv_file']['tmp_name'];
+
+$rows = [];
+
+if ($file_ext === 'xlsx') {
+    require_once __DIR__ . '/../includes/SimpleXLSX.php';
+    if ($xlsx = Shuchkin\SimpleXLSX::parse($tmp_name)) {
+        $rows = $xlsx->rows();
+    } else {
+        set_flash_message('danger', 'Error parsing XLSX file. It might be corrupted.');
+        header("Location: payroll_upload.php");
+        exit;
+    }
+} else {
+    $file = fopen($tmp_name, 'r');
+    if ($file !== false) {
+        while (($row = fgetcsv($file)) !== false) {
+            $rows[] = $row;
+        }
+        fclose($file);
+    }
+}
+
+if (empty($rows)) {
+    set_flash_message('danger', 'The uploaded file is empty or invalid.');
+    header("Location: payroll_upload.php");
+    exit;
+}
+
+$header = array_shift($rows);
 
 if (!$header || $header[0] !== 'Emp_Code' || $header[1] !== 'Work_Days' || $header[2] !== 'LOP_Days') {
-    set_flash_message('danger', 'Invalid CSV format. Please use the provided template.');
+    set_flash_message('danger', 'Invalid file format. Please use the provided template (Emp_Code, Work_Days, LOP_Days).');
     header("Location: payroll_upload.php");
     exit;
 }
@@ -56,7 +86,7 @@ $errors = [];
 $preview_data = [];
 $row_num = 1;
 
-while (($row = fgetcsv($file)) !== false) {
+foreach ($rows as $row) {
     $row_num++;
     if (empty(array_filter($row))) continue; // skip empty rows
 
@@ -119,7 +149,7 @@ while (($row = fgetcsv($file)) !== false) {
         'items' => $calc_results['items']
     ];
 }
-fclose($file);
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
