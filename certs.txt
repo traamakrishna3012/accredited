@@ -1,0 +1,11 @@
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Found the following certs:
+  Certificate Name: accredited.co.in
+    Serial Number: 53ce0c1b40a779ef77439bf9ddcd0881d72
+    Key Type: ECDSA
+    Domains: accredited.co.in www.accredited.co.in
+    Expiry Date: 2026-03-18 16:57:35+00:00 (INVALID: EXPIRED)
+    Certificate Path: /etc/letsencrypt/live/accredited.co.in/fullchain.pem
+    Private Key Path: /etc/letsencrypt/live/accredited.co.in/privkey.pem
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

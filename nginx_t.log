@@ -1,0 +1,2 @@
+2026/03/27 10:32:56 [emerg] 2277049#2277049: SSL_CTX_use_PrivateKey("/etc/letsencrypt/live/accredited.co.in/privkey.pem") failed (SSL: error:05800074:x509 certificate routines::key values mismatch)
+nginx: configuration file /etc/nginx/nginx.conf test failed

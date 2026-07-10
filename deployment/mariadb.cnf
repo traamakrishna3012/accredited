@@ -1,0 +1,45 @@
+# MariaDB Configuration for OCI (1GB RAM)
+# Place in /etc/mysql/mariadb.conf.d/99-optimized.cnf
+
+[mysqld]
+# === Connection Settings ===
+max_connections = 30
+max_connect_errors = 100000
+wait_timeout = 300
+interactive_timeout = 300
+
+# === Memory Settings (Optimized for 1GB RAM) ===
+# InnoDB buffer pool - main memory consumer
+innodb_buffer_pool_size = 128M
+innodb_buffer_pool_instances = 1
+
+# Query cache (deprecated in MySQL 8 but works in MariaDB)
+query_cache_type = 1
+query_cache_size = 16M
+query_cache_limit = 1M
+
+# Thread and table caching
+thread_cache_size = 8
+table_open_cache = 200
+table_definition_cache = 400
+
+# Temporary tables
+tmp_table_size = 16M
+max_heap_table_size = 16M
+
+# === InnoDB Settings ===
+innodb_log_file_size = 32M
+innodb_log_buffer_size = 8M
+innodb_flush_log_at_trx_commit = 2
+innodb_flush_method = O_DIRECT
+
+# === Performance Settings ===
+skip_name_resolve = 1
+performance_schema = OFF
+
+# === Character Set ===
+character-set-server = utf8mb4
+collation-server = utf8mb4_unicode_ci
+
+[client]
+default-character-set = utf8mb4
