@@ -72,7 +72,7 @@ function generate_payslip_pdf($pdo, $payslip_id, &$filename_out = null) {
             th, td { padding: 6px; border: 1px solid #ccc; }
             .no-border th, .no-border td { border: none; padding: 4px; }
             .bg-light { background-color: #f8f9fa; }
-            .company-header { border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
+            .company-header { border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 15px; min-height: 75px; }
             .company-title { font-size: 18px; font-weight: bold; text-transform: uppercase; }
             
             .grid-table { width: 100%; border: 1px solid #000; margin-bottom: 15px; }
@@ -95,7 +95,7 @@ function generate_payslip_pdf($pdo, $payslip_id, &$filename_out = null) {
     </head>
     <body>
         <div class="company-header text-center" style="position: relative;">
-            ' . (file_exists(__DIR__ . '/../assets/images/Agency_Logo_temp.png') ? '<img src="' . __DIR__ . '/../assets/images/Agency_Logo_temp.png" style="max-height: 40px; position: absolute; left: 0; top: 0;">' : '') . '
+            ' . (file_exists(__DIR__ . '/../assets/images/Agency_Logo_old.svg') ? '<img src="' . __DIR__ . '/../assets/images/Agency_Logo_old.svg" style="max-height: 70px; position: absolute; left: 0; top: -5px;">' : '') . '
             <div class="company-title">' . htmlspecialchars($site_name) . '</div>
             <div>Payslip for the month of ' . $month_formatted . '</div>
         </div>
@@ -190,7 +190,7 @@ function generate_payslip_pdf($pdo, $payslip_id, &$filename_out = null) {
             </tr>
             <tr class="fw-bold">
                 <td colspan="4" class="text-right">NET PAY</td>
-                <td colspan="2" class="text-right" style="font-size: 14px;">&#8377; ' . number_format($payslip['net_pay'], 2) . '</td>
+                <td colspan="2" class="text-right" style="font-size: 14px;">Rs. ' . number_format($payslip['net_pay'], 2) . '</td>
             </tr>
         </table>
 
@@ -199,14 +199,21 @@ function generate_payslip_pdf($pdo, $payslip_id, &$filename_out = null) {
             ' . number_to_indian_words($payslip['net_pay']) . '
         </div>
 
-        <div class="mb-4" style="font-size: 10px; color: #555;">
-            <em>Note: This is a computer generated payslip and does not require a physical signature.</em>
-        </div>
-        
-        <div class="signature-box" style="position: relative; height: 60px;">
-            ' . (file_exists(__DIR__ . '/../uploads/settings/digital_seal.png') ? '<img src="' . __DIR__ . '/../uploads/settings/digital_seal.png" style="max-height: 60px; position: absolute; right: 150px; top: -10px;">' : '') . '
-            ' . (file_exists(__DIR__ . '/../uploads/settings/digital_sign.png') ? '<img src="' . __DIR__ . '/../uploads/settings/digital_sign.png" style="max-height: 40px; position: absolute; right: 20px; top: -10px;">' : '') . '
-            <div style="position: absolute; bottom: 0; right: 0; width: 100%; text-align: right;">Authorized Signatory</div>
+        <div class="signature-box" style="margin-top: 50px;">
+            <table style="width: 100%; border: none;">
+                <tr>
+                    <td style="width: 60%; vertical-align: bottom; border: none; text-align: left;">
+                        <div style="font-size: 10px; color: #555;">
+                            <em>Note: This is a computer generated payslip and does not require a physical signature.</em>
+                        </div>
+                    </td>
+                    <td style="width: 40%; text-align: center; vertical-align: bottom; border: none;">
+                        ' . (file_exists(__DIR__ . '/../uploads/settings/digital_seal.png') ? '<img src="' . __DIR__ . '/../uploads/settings/digital_seal.png" style="max-height: 80px; margin-bottom: 5px;">' : '') . '
+                        ' . (file_exists(__DIR__ . '/../uploads/settings/digital_sign.png') ? '<img src="' . __DIR__ . '/../uploads/settings/digital_sign.png" style="max-height: 40px; margin-bottom: 5px;">' : '') . '
+                        <div style="border-top: 1px solid #000; padding-top: 5px; margin-top: 5px;">Authorized Signatory</div>
+                    </td>
+                </tr>
+            </table>
         </div>
     </body>
     </html>';
@@ -215,6 +222,7 @@ function generate_payslip_pdf($pdo, $payslip_id, &$filename_out = null) {
     $options = new Options();
     $options->set('isRemoteEnabled', true);
     $options->set('defaultFont', 'DejaVu Sans');
+    $options->set('chroot', realpath(__DIR__ . '/../'));
     $dompdf = new Dompdf($options);
 
     $dompdf->loadHtml($html);
