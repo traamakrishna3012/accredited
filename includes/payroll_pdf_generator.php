@@ -95,7 +95,7 @@ function generate_payslip_pdf($pdo, $payslip_id, &$filename_out = null) {
     </head>
     <body>
         <div class="company-header text-center" style="position: relative;">
-            ' . (file_exists(__DIR__ . '/../uploads/settings/company_logo.png') ? '<img src="' . __DIR__ . '/../uploads/settings/company_logo.png" style="max-height: 40px; position: absolute; left: 0; top: 0;">' : '') . '
+            ' . (file_exists(__DIR__ . '/../assets/images/Agency_Logo_temp.png') ? '<img src="' . __DIR__ . '/../assets/images/Agency_Logo_temp.png" style="max-height: 40px; position: absolute; left: 0; top: 0;">' : '') . '
             <div class="company-title">' . htmlspecialchars($site_name) . '</div>
             <div>Payslip for the month of ' . $month_formatted . '</div>
         </div>
@@ -203,11 +203,10 @@ function generate_payslip_pdf($pdo, $payslip_id, &$filename_out = null) {
             <em>Note: This is a computer generated payslip and does not require a physical signature.</em>
         </div>
         
-        <div class="signature-box">
-            ' . (file_exists(__DIR__ . '/../uploads/settings/digital_seal.png') ? '<img src="' . __DIR__ . '/../uploads/settings/digital_seal.png" style="max-height: 50px; display: block; float: right; margin-bottom: 5px;">' : '') . '
-            <div style="clear: both;"></div>
-            <div>_______________________</div>
-            <div style="margin-top: 5px;">Authorized Signatory</div>
+        <div class="signature-box" style="position: relative; height: 60px;">
+            ' . (file_exists(__DIR__ . '/../uploads/settings/digital_seal.png') ? '<img src="' . __DIR__ . '/../uploads/settings/digital_seal.png" style="max-height: 60px; position: absolute; right: 150px; top: -10px;">' : '') . '
+            ' . (file_exists(__DIR__ . '/../uploads/settings/digital_sign.png') ? '<img src="' . __DIR__ . '/../uploads/settings/digital_sign.png" style="max-height: 40px; position: absolute; right: 20px; top: -10px;">' : '') . '
+            <div style="position: absolute; bottom: 0; right: 0; width: 100%; text-align: right;">Authorized Signatory</div>
         </div>
     </body>
     </html>';
