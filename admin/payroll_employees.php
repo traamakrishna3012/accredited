@@ -7,7 +7,22 @@
 require_once __DIR__ . '/auth_check.php';
 require_once __DIR__ . '/../includes/payroll_functions.php';
 
-$employees = get_payroll_employees($pdo);
+// Pagination logic
+$limit = 15;
+$page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+$offset = ($page - 1) * $limit;
+
+// Fetch paginated employees
+$stmt = $pdo->prepare("SELECT * FROM payroll_employees ORDER BY emp_code ASC LIMIT ? OFFSET ?");
+$stmt->bindValue(1, $limit, PDO::PARAM_INT);
+$stmt->bindValue(2, $offset, PDO::PARAM_INT);
+$stmt->execute();
+$employees = $stmt->fetchAll();
+
+// Total count
+$total_stmt = $pdo->query("SELECT COUNT(*) FROM payroll_employees");
+$total_employees = $total_stmt->fetchColumn();
+$total_pages = ceil($total_employees / $limit);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -90,6 +105,28 @@ $employees = get_payroll_employees($pdo);
                                 </tbody>
                             </table>
                         </div>
+                        
+                        <!-- Pagination -->
+                        <?php if ($total_pages > 1): ?>
+                        <div class="d-flex justify-content-center p-3 border-top">
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination mb-0">
+                                    <li class="page-item <?php echo $page <= 1 ? 'disabled' : ''; ?>">
+                                        <a class="page-link" href="?page=<?php echo $page - 1; ?>">Previous</a>
+                                    </li>
+                                    <?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
+                                        <li class="page-item <?php echo $page == $i ? 'active' : ''; ?>">
+                                            <a class="page-link" href="?page=<?php echo $i; ?>"><?php echo $i; ?></a>
+                                        </li>
+                                    <?php endfor; ?>
+                                    <li class="page-item <?php echo $page >= $total_pages ? 'disabled' : ''; ?>">
+                                        <a class="page-link" href="?page=<?php echo $page + 1; ?>">Next</a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                        <?php endif; ?>
+
                     </div>
                 </div>
             </div>
