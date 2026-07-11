@@ -46,6 +46,21 @@ try {
         VALUES (?, ?, ?, ?)
     ");
 
+    // Update metadata if present
+    $stmt_update_emp = $pdo->prepare("
+        UPDATE payroll_employees 
+        SET location = COALESCE(NULLIF(?, ''), location),
+            designation = COALESCE(NULLIF(?, ''), designation),
+            bank_name = COALESCE(NULLIF(?, ''), bank_name),
+            bank_account = COALESCE(NULLIF(?, ''), bank_account),
+            doj = COALESCE(NULLIF(?, ''), doj),
+            pan_no = COALESCE(NULLIF(?, ''), pan_no),
+            pf_no = COALESCE(NULLIF(?, ''), pf_no),
+            uan_no = COALESCE(NULLIF(?, ''), uan_no),
+            esic_no = COALESCE(NULLIF(?, ''), esic_no)
+        WHERE id = ?
+    ");
+
     // 4. Insert records
     foreach ($data as $emp) {
         $stmt_payslip->execute([
@@ -61,6 +76,23 @@ try {
             $emp['net_pay']
         ]);
         $payslip_id = $pdo->lastInsertId();
+
+        if (isset($emp['metadata'])) {
+            $meta = $emp['metadata'];
+            // Convert empty DOJ to null for valid date type, or leave empty if your DB accepts it. Let's pass empty strings because NULLIF handles it.
+            $stmt_update_emp->execute([
+                $meta['location'] ?? '',
+                $meta['designation'] ?? '',
+                $meta['bank_name'] ?? '',
+                $meta['bank_account'] ?? '',
+                $meta['doj'] ?? '',
+                $meta['pan_no'] ?? '',
+                $meta['pf_no'] ?? '',
+                $meta['uan_no'] ?? '',
+                $meta['esic_no'] ?? '',
+                $emp['employee_id']
+            ]);
+        }
 
         foreach ($emp['items'] as $item) {
             // Only insert if there's actually a standard or actual amount > 0 (saves DB space)

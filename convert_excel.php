@@ -16,7 +16,7 @@ foreach ($db_components as $comp) {
 }
 
 // 2. Parse input Excel
-$input_file = 'C:\Users\trama\Downloads\Salary_Slip_June_2026.xlsx';
+$input_file = __DIR__ . '/Salary_Slip_June_2026.xlsx';
 $xlsx = Shuchkin\SimpleXLSX::parse($input_file);
 if (!$xlsx) {
     die("Error parsing input: " . Shuchkin\SimpleXLSX::parseError());
@@ -114,19 +114,27 @@ foreach ($rows as $row) {
             $current_emp['info']['LOP_Reversal'] = trim($row[5] ?? '');
         }
         
-        // Extract Other Info
-        if (isset($row[3]) && trim($row[3]) === 'Employee Name') $current_emp['info']['Employee_Name'] = trim($row[5] ?? '');
-        if (isset($row[1]) && trim($row[1]) === 'Bank Name') $current_emp['info']['Bank_Name'] = trim($row[2] ?? '');
-        if (isset($row[3]) && trim($row[3]) === 'Bank A/C No') $current_emp['info']['Bank_Account'] = trim($row[5] ?? '');
-        if (isset($row[1]) && trim($row[1]) === 'DOJ') $current_emp['info']['DOJ'] = trim($row[2] ?? '');
-        if (isset($row[3]) && trim($row[3]) === 'PAN') $current_emp['info']['PAN'] = trim($row[5] ?? '');
-        if (isset($row[1]) && trim($row[1]) === 'PF No.') $current_emp['info']['PF_No'] = trim($row[2] ?? '');
-        if (isset($row[3]) && trim($row[3]) === 'PF UAN') $current_emp['info']['PF_UAN'] = trim($row[5] ?? '');
-        if (isset($row[1]) && trim($row[1]) === 'Location') $current_emp['info']['Location'] = trim($row[2] ?? '');
-        if (isset($row[3]) && trim($row[3]) === 'ESIC No') $current_emp['info']['ESIC_No'] = trim($row[5] ?? '');
-        if (isset($row[1]) && trim($row[1]) === 'Designation') $current_emp['info']['Designation'] = trim($row[2] ?? '');
+        // Extract Other Info (Fallback using robust loop anyway)
+        foreach ($row as $idx => $val) {
+            $tval = trim($val);
+            if ($tval === 'PF No.') $current_emp['info']['PF_No'] = trim($row[$idx+1] ?? '');
+            if ($tval === 'PF UAN') $current_emp['info']['PF_UAN'] = trim($row[$idx+1] ?? '');
+            if ($tval === 'Work Days') $current_emp['info']['Work_Days'] = trim($row[$idx+2] ?? trim($row[$idx+1] ?? ''));
+            if ($tval === 'LOP Days') $current_emp['info']['LOP_Days'] = trim($row[$idx+2] ?? trim($row[$idx+1] ?? ''));
+            if ($tval === 'Standard days') $current_emp['info']['Standard_Days'] = trim($row[$idx+1] ?? '');
+            if ($tval === 'Previous Month LOP Days') $current_emp['info']['Prev_Month_LOP'] = trim($row[$idx+1] ?? '');
+            if ($tval === 'LOP Reversal Days') $current_emp['info']['LOP_Reversal'] = trim($row[$idx+2] ?? trim($row[$idx+1] ?? ''));
+            if ($tval === 'Employee Name') $current_emp['info']['Employee_Name'] = trim($row[$idx+2] ?? trim($row[$idx+1] ?? ''));
+            if ($tval === 'Bank Name') $current_emp['info']['Bank_Name'] = trim($row[$idx+1] ?? '');
+            if ($tval === 'Bank A/C No') $current_emp['info']['Bank_Account'] = trim($row[$idx+2] ?? trim($row[$idx+1] ?? ''));
+            if ($tval === 'DOJ') $current_emp['info']['DOJ'] = trim($row[$idx+1] ?? '');
+            if ($tval === 'PAN') $current_emp['info']['PAN'] = trim($row[$idx+2] ?? trim($row[$idx+1] ?? ''));
+            if ($tval === 'Location') $current_emp['info']['Location'] = trim($row[$idx+1] ?? '');
+            if ($tval === 'ESIC No') $current_emp['info']['ESIC_No'] = trim($row[$idx+2] ?? trim($row[$idx+1] ?? ''));
+            if ($tval === 'Designation') $current_emp['info']['Designation'] = trim($row[$idx+1] ?? '');
+        }
 
-        // Extract Earnings (Col 1 = Name, Col 2 = Standard Amount)
+        // Extract Earnings (Col B = Name, Col C = Standard Amount)
         if (isset($row[1]) && trim($row[1]) !== '' && trim($row[1]) !== 'Employee Code' && trim($row[1]) !== 'Bank Name' && trim($row[1]) !== 'DOJ' && trim($row[1]) !== 'PF No.' && trim($row[1]) !== 'Location' && trim($row[1]) !== 'Designation' && trim($row[1]) !== 'Standard days' && trim($row[1]) !== 'Previous Month LOP Days' && trim($row[1]) !== 'Components' && trim($row[1]) !== 'Total Earnings' && trim($row[1]) !== 'Amount in words') {
             $name = strtolower(trim(str_replace('_', '', $row[1]))); // Basic_ Salary -> basic salary
             $std_amount = trim($row[2] ?? '');
@@ -169,10 +177,15 @@ foreach ($rows as $row) {
             }
         }
         
-        // Extract Deductions (Col 4 = Name, Col 6 = Amount)
-        if (isset($row[4]) && trim($row[4]) !== '' && trim($row[4]) !== 'Components' && trim($row[4]) !== 'Total Deductions') {
+        // Extract Deductions (Col E = Name, Col G = Amount)
+        // Wait, in output above, `Provident Fund` is at [4] and Amount `4125` is at [6].
+        // So name is in [4], amount is in [6].
+        if (isset($row[4]) && trim($row[4]) !== '' && trim($row[4]) !== 'Components' && trim($row[4]) !== 'Employee Name' && trim($row[4]) !== 'Bank A/C No' && trim($row[4]) !== 'PAN' && trim($row[4]) !== 'PF UAN' && trim($row[4]) !== 'ESIC No' && trim($row[4]) !== 'Work Days' && trim($row[4]) !== 'LOP Days' && trim($row[4]) !== 'LOP Reversal Days' && trim($row[4]) !== 'Deductions' && trim($row[4]) !== 'Total Deductions') {
             $name = strtolower(trim($row[4]));
             $amount = trim($row[6] ?? '');
+            if ($amount === '') {
+                $amount = trim($row[5] ?? ''); // Fallback
+            }
             if (is_numeric($amount)) {
                 $found_ded = false;
                 $clean_name = trim($row[4]);
@@ -213,6 +226,7 @@ foreach ($rows as $row) {
     }
 }
 
+
 // Push last employee
 if ($current_emp !== null) {
     $out_row = [
@@ -242,10 +256,8 @@ if ($current_emp !== null) {
 // 3. Generate output Excel
 // We must prepend the headers to the output_data array so that any new dynamically added components are included!
 array_unshift($output_data, $headers);
-$out_xlsx = Shuchkin\SimpleXLSXGen::fromArray($output_data);
-$output_file = 'C:\Users\trama\Downloads\bulk_upload_final_june_v2.xlsx';
-$out_xlsx->saveAs($output_file);
-
-echo "Successfully converted to: " . $output_file . "\n";
-print_r($output_data);
-
+// 4. Generate Output Excel
+$out_file = __DIR__ . '/Salary_Slip_June_2026_converted.xlsx';
+Shuchkin\SimpleXLSXGen::fromArray($output_data)->saveAs($out_file);
+echo "Successfully converted to: " . $out_file . "\n";
+// print_r($output_data); // Keep this commented out or minimal

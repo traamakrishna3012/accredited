@@ -400,8 +400,11 @@ a:hover {
 /* Admin Styles */
 .admin-sidebar {
     background: var(--primary-dark);
-    min-height: 100vh;
+    height: 100vh;
     padding: 1.5rem;
+    position: sticky;
+    top: 0;
+    overflow-y: auto;
 }
 
 .admin-sidebar .nav-link {

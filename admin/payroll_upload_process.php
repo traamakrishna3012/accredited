@@ -67,6 +67,16 @@ $idx_std = $col_idx['Standard_Days'] ?? -1;
 $idx_prev = $col_idx['Prev_Month_LOP'] ?? -1;
 $idx_rev = $col_idx['LOP_Reversal'] ?? -1;
 
+$idx_loc = $col_idx['Location'] ?? -1;
+$idx_desig = $col_idx['Designation'] ?? -1;
+$idx_bank = $col_idx['Bank_Name'] ?? -1;
+$idx_acc = $col_idx['Bank_Account'] ?? -1;
+$idx_doj = $col_idx['DOJ'] ?? -1;
+$idx_pan = $col_idx['PAN'] ?? -1;
+$idx_pf = $col_idx['PF_No'] ?? -1;
+$idx_uan = $col_idx['PF_UAN'] ?? -1;
+$idx_esic = $col_idx['ESIC_No'] ?? -1;
+
 // Map header columns to component IDs
 $components = get_payroll_components($pdo);
 $comp_map = []; // name => id
@@ -157,6 +167,18 @@ foreach ($rows as $row) {
         'standard_days' => ($idx_std >= 0 && isset($row[$idx_std]) && is_numeric(trim($row[$idx_std]))) ? (float)trim($row[$idx_std]) : 0,
         'prev_month_lop' => ($idx_prev >= 0 && isset($row[$idx_prev]) && is_numeric(trim($row[$idx_prev]))) ? (float)trim($row[$idx_prev]) : 0,
         'lop_reversal' => ($idx_rev >= 0 && isset($row[$idx_rev]) && is_numeric(trim($row[$idx_rev]))) ? (float)trim($row[$idx_rev]) : 0,
+        'metadata' => [
+            'location' => $idx_loc >= 0 ? trim($row[$idx_loc] ?? '') : '',
+            'designation' => $idx_desig >= 0 ? trim($row[$idx_desig] ?? '') : '',
+            'bank_name' => $idx_bank >= 0 ? trim($row[$idx_bank] ?? '') : '',
+            'bank_account' => $idx_acc >= 0 ? trim($row[$idx_acc] ?? '') : '',
+            'doj' => $idx_doj >= 0 ? trim($row[$idx_doj] ?? '') : '',
+            'pan_no' => $idx_pan >= 0 ? trim($row[$idx_pan] ?? '') : '',
+            'pf_no' => $idx_pf >= 0 ? trim($row[$idx_pf] ?? '') : '',
+            'uan_no' => $idx_uan >= 0 ? trim($row[$idx_uan] ?? '') : '',
+            'esic_no' => $idx_esic >= 0 ? trim($row[$idx_esic] ?? '') : '',
+        ],
+        'components' => $calc_struct,
         'earnings' => $calc_results['total_earnings'],
         'deductions' => $calc_results['total_deductions'],
         'net_pay' => $calc_results['net_pay'],
