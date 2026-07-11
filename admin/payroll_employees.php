@@ -7,6 +7,23 @@
 require_once __DIR__ . '/auth_check.php';
 require_once __DIR__ . '/../includes/payroll_functions.php';
 
+// Handle Delete
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete') {
+    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
+        die("Invalid CSRF token");
+    }
+    $delete_id = (int)$_POST['delete_id'];
+    if ($delete_id > 0) {
+        // delete dependencies first
+        $pdo->exec("DELETE FROM payroll_employee_salary_structure WHERE employee_id = " . $delete_id);
+        // then delete the employee
+        $pdo->exec("DELETE FROM payroll_employees WHERE id = " . $delete_id);
+        set_flash_message('success', 'Employee deleted successfully.');
+        header("Location: payroll_employees.php");
+        exit;
+    }
+}
+
 // Pagination logic
 $limit = 15;
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
@@ -98,6 +115,14 @@ $total_pages = ceil($total_employees / $limit);
                                                     <a href="payroll_employee_edit.php?id=<?php echo $emp['id']; ?>" class="btn btn-sm btn-outline-primary">
                                                         <i class="bi bi-pencil"></i> Edit
                                                     </a>
+                                                    <form method="POST" action="" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this employee? This action cannot be undone.');">
+                                                        <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
+                                                        <input type="hidden" name="action" value="delete">
+                                                        <input type="hidden" name="delete_id" value="<?php echo $emp['id']; ?>">
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger ms-1">
+                                                            <i class="bi bi-trash"></i> Delete
+                                                        </button>
+                                                    </form>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
