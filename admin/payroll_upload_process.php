@@ -97,10 +97,10 @@ for ($i = 0; $i < count($header); $i++) {
     }
 }
 
-$employees_raw = get_payroll_employees($pdo, 'active');
+$employees_raw = get_payroll_employees($pdo);
 $employees = [];
 foreach ($employees_raw as $e) {
-    $employees[$e['emp_code']] = $e;
+    $employees[trim($e['emp_code'])] = $e;
 }
 
 $errors = [];
@@ -111,15 +111,47 @@ foreach ($rows as $row) {
     $row_num++;
     if (empty(array_filter($row))) continue; // skip empty rows
 
-    $emp_code = trim($row[$idx_emp] ?? '');
+    $raw_emp = $row[$idx_emp] ?? '';
+    // Remove BOM and non-printable characters
+    $emp_code = preg_replace('/[\x00-\x1F\x7F\xA0]/u', '', trim($raw_emp, " \t\n\r\0\x0B\xEF\xBB\xBF"));
+    $emp_code = trim($emp_code);
     if (empty($emp_code)) continue;
 
-    if (!isset($employees[$emp_code])) {
-        $errors[] = "Row $row_num: Employee code '$emp_code' not found or inactive.";
+    $matched_emp_code = null;
+    if (isset($employees[$emp_code])) {
+        $matched_emp_code = $emp_code;
+    } else {
+        // Try to match 'EMP001' from CSV to '0001' or '1' in DB
+        if (preg_match('/^EMP0*(\d+)$/i', $emp_code, $matches)) {
+            $normalized = str_pad($matches[1], 4, '0', STR_PAD_LEFT);
+            if (isset($employees[$normalized])) {
+                $matched_emp_code = $normalized;
+            } elseif (isset($employees[$matches[1]])) {
+                $matched_emp_code = $matches[1];
+            }
+        }
+        // Try to match '0001' from CSV to 'EMP001' in DB
+        if (!$matched_emp_code && preg_match('/^0*(\d+)$/', $emp_code, $matches)) {
+            $normalized2 = 'EMP' . str_pad($matches[1], 3, '0', STR_PAD_LEFT);
+            if (isset($employees[$normalized2])) {
+                $matched_emp_code = $normalized2;
+            }
+        }
+    }
+
+    if (!$matched_emp_code) {
+        $errors[] = "Row $row_num: Employee code '$emp_code' not found.";
         continue;
     }
 
-    $emp = $employees[$emp_code];
+    $emp = $employees[$matched_emp_code];
+    if (strtolower(trim($emp['status'])) !== 'active') {
+        $errors[] = "Row $row_num: Employee '$emp_code' is inactive.";
+        continue;
+    }
+    
+    // Update emp_code to the matched DB code so the preview data maps correctly
+    $emp_code = $matched_emp_code;
     $work_days = (float)($row[$idx_work] ?? 0);
     $lop_days = (float)($row[$idx_lop] ?? 0);
 
