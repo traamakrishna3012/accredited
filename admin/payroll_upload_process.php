@@ -7,6 +7,43 @@ require_once __DIR__ . '/auth_check.php';
 require_once __DIR__ . '/../includes/payroll_functions.php';
 require_once __DIR__ . '/../includes/payroll_calculator.php';
 
+/**
+ * Normalize various date formats to YYYY-MM-DD for MySQL.
+ * Handles: DD-MM-YYYY, DD.MM.YYYY, DD/MM/YYYY, YYYY-MM-DD, YYYY/MM/DD, and Excel serial dates.
+ */
+function normalize_date_to_ymd($raw_date) {
+    $raw_date = trim($raw_date);
+    if (empty($raw_date) || strtoupper($raw_date) === 'NA') {
+        return '';
+    }
+
+    // Already in YYYY-MM-DD format
+    if (preg_match('/^\d{4}[\-\/]\d{1,2}[\-\/]\d{1,2}$/', $raw_date)) {
+        $dt = DateTime::createFromFormat('Y-m-d', str_replace('/', '-', $raw_date));
+        if ($dt) return $dt->format('Y-m-d');
+    }
+
+    // DD-MM-YYYY or DD.MM.YYYY or DD/MM/YYYY
+    if (preg_match('/^(\d{1,2})[\-\.\/](\d{1,2})[\-\.\/](\d{4})$/', $raw_date, $m)) {
+        $dt = DateTime::createFromFormat('d-m-Y', sprintf('%02d-%02d-%04d', $m[1], $m[2], $m[3]));
+        if ($dt) return $dt->format('Y-m-d');
+    }
+
+    // Excel serial date number (e.g. 45972)
+    if (is_numeric($raw_date) && (int)$raw_date > 30000 && (int)$raw_date < 100000) {
+        $unix = ($raw_date - 25569) * 86400;
+        return gmdate('Y-m-d', (int)$unix);
+    }
+
+    // Try PHP's best guess as last resort
+    $ts = strtotime($raw_date);
+    if ($ts !== false) {
+        return date('Y-m-d', $ts);
+    }
+
+    return ''; // Unrecognizable
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !verify_csrf_token($_POST['csrf_token'] ?? '')) {
     die("Invalid request");
 }
@@ -204,7 +241,7 @@ foreach ($rows as $row) {
             'designation' => $idx_desig >= 0 ? trim($row[$idx_desig] ?? '') : '',
             'bank_name' => $idx_bank >= 0 ? trim($row[$idx_bank] ?? '') : '',
             'bank_account' => $idx_acc >= 0 ? trim($row[$idx_acc] ?? '') : '',
-            'doj' => $idx_doj >= 0 ? trim($row[$idx_doj] ?? '') : '',
+            'doj' => $idx_doj >= 0 ? normalize_date_to_ymd($row[$idx_doj] ?? '') : '',
             'pan_no' => $idx_pan >= 0 ? trim($row[$idx_pan] ?? '') : '',
             'pf_no' => $idx_pf >= 0 ? trim($row[$idx_pf] ?? '') : '',
             'uan_no' => $idx_uan >= 0 ? trim($row[$idx_uan] ?? '') : '',

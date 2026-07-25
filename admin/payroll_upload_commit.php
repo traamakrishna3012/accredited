@@ -6,6 +6,34 @@
 require_once __DIR__ . '/auth_check.php';
 require_once __DIR__ . '/../includes/payroll_functions.php';
 
+/**
+ * Normalize various date formats to YYYY-MM-DD for MySQL.
+ */
+function normalize_date_to_ymd_commit($raw_date) {
+    $raw_date = trim($raw_date);
+    if (empty($raw_date) || strtoupper($raw_date) === 'NA') {
+        return '';
+    }
+    // Already YYYY-MM-DD
+    if (preg_match('/^\d{4}[\-\/]\d{1,2}[\-\/]\d{1,2}$/', $raw_date)) {
+        $dt = DateTime::createFromFormat('Y-m-d', str_replace('/', '-', $raw_date));
+        if ($dt) return $dt->format('Y-m-d');
+    }
+    // DD-MM-YYYY or DD.MM.YYYY or DD/MM/YYYY
+    if (preg_match('/^(\d{1,2})[\-\.\/](\d{1,2})[\-\.\/](\d{4})$/', $raw_date, $m)) {
+        $dt = DateTime::createFromFormat('d-m-Y', sprintf('%02d-%02d-%04d', $m[1], $m[2], $m[3]));
+        if ($dt) return $dt->format('Y-m-d');
+    }
+    // Excel serial date
+    if (is_numeric($raw_date) && (int)$raw_date > 30000 && (int)$raw_date < 100000) {
+        $unix = ($raw_date - 25569) * 86400;
+        return gmdate('Y-m-d', (int)$unix);
+    }
+    $ts = strtotime($raw_date);
+    if ($ts !== false) return date('Y-m-d', $ts);
+    return '';
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !verify_csrf_token($_POST['csrf_token'] ?? '')) {
     die("Invalid request");
 }
@@ -85,7 +113,7 @@ try {
                 $meta['designation'] ?? '',
                 $meta['bank_name'] ?? '',
                 $meta['bank_account'] ?? '',
-                $meta['doj'] ?? '',
+                normalize_date_to_ymd_commit($meta['doj'] ?? ''),
                 $meta['pan_no'] ?? '',
                 $meta['pf_no'] ?? '',
                 $meta['uan_no'] ?? '',
