@@ -149,7 +149,7 @@ function is_spam_inquiry($data, &$reason = null)
     // Common URL patterns, protocols, and high-spam TLDs (.buzz, .ru, .xyz, etc.)
     $link_patterns = [
         '/(http:\/\/|https:\/\/|ftp:\/\/|www\.)/i',
-        '/\b(peskartyhrt|sekalubanik|tinyurl|bit\.ly|t\.co|goo\.gl|is\.gd|ow\.ly|buff\.ly)\b/i',
+        '/\b(peskartyhrt|sekalubanik|tinyurl|bit\.ly|t\.co|goo\.gl|is\.gd|ow\.ly|buff\.ly|graph\.org|telegra\.ph)\b/i',
         '/\b[a-zA-Z0-9-]+\.(buzz|ru|xyz|top|site|online|link|click|tk|ml|ga|cf|gq|club|icu|rest|beauty|best|monster|hair|live|shop|cfd|sbs)\b/i',
         '/\b[a-zA-Z0-9-]{3,}\.(com|net|org|biz|info)\/[a-zA-Z0-9_\-\?\#\=\&\.]+/i'
     ];
@@ -167,11 +167,11 @@ function is_spam_inquiry($data, &$reason = null)
         'перевод', 'руб', 'бонус', 'выигрыш', 'приз', 'подарок', 'вознаграждение',
         'забрать тут', 'получить тут', 'откройте подробности', 'по ссылке',
         // Financial & crypto phishing
-        'withdrawal operation', 'account will be blocked', 'crypto', 'bitcoin',
-        'usdt', 'ethereum', 'wallet balance', 'earn money', 'passive income',
+        'withdrawal operation', 'account will be blocked', 'crypto', 'bitcoin', 'btc',
+        'coinbase', 'transfer №', 'usdt', 'ethereum', 'wallet balance', 'earn money', 'passive income',
         'payout', 'claim your prize', 'lottery winner', 'jackpot', 'casino',
         'telegram:', 't.me/', 'whatsapp:', 'viagra', 'cialis', 'backlinks',
-        'seo ranking', 'first page of google', 'guest post', 'AledyCeds'
+        'seo ranking', 'first page of google', 'guest post', 'AledyCeds', 'RobertGip'
     ];
 
     $combined_lower = mb_strtolower($combined_text, 'UTF-8');
@@ -186,6 +186,7 @@ function is_spam_inquiry($data, &$reason = null)
     $blacklisted_domains = [
         'nolettersbox.com',
         'notboxletters.com',
+        'notlettersmail.com',
         'mailinator.com',
         'tempmail.com',
         'guerrillamail.com',

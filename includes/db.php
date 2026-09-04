@@ -156,32 +156,67 @@ function get_inquiry_counts($pdo)
 }
 
 /**
+ * Get SQL WHERE clause for spam detection
+ */
+function get_spam_where_clause()
+{
+    return "
+        name LIKE '%http%' 
+        OR message LIKE '%http%'
+        OR name LIKE '%www.%'
+        OR message LIKE '%www.%'
+        OR name LIKE '%.buzz%'
+        OR message LIKE '%.buzz%'
+        OR name LIKE '%tinyurl%'
+        OR message LIKE '%tinyurl%'
+        OR name LIKE '%graph.org%'
+        OR message LIKE '%graph.org%'
+        OR name LIKE '%telegra.ph%'
+        OR message LIKE '%telegra.ph%'
+        OR name LIKE '%peskartyhrt%'
+        OR message LIKE '%peskartyhrt%'
+        OR name LIKE '%sekalubanik%'
+        OR message LIKE '%sekalubanik%'
+        OR name LIKE '%BTC%'
+        OR message LIKE '%BTC%'
+        OR name LIKE '%Coinbase%'
+        OR message LIKE '%Coinbase%'
+        OR name LIKE '%Transfer №%'
+        OR message LIKE '%Transfer №%'
+        OR name LIKE '%withdrawal%'
+        OR message LIKE '%withdrawal%'
+        OR name = 'RobertGip'
+        OR name LIKE '%AledyCeds%'
+        OR message LIKE '%AledyCeds%'
+        OR name LIKE '%руб%'
+        OR message LIKE '%руб%'
+        OR name LIKE '%перевод%'
+        OR message LIKE '%перевод%'
+        OR name LIKE '%бонус%'
+        OR message LIKE '%бонус%'
+        OR name LIKE '%приз%'
+        OR message LIKE '%приз%'
+        OR name LIKE '%подарок%'
+        OR message LIKE '%подарок%'
+        OR name LIKE '%вознаграждение%'
+        OR message LIKE '%вознаграждение%'
+        OR email LIKE '%@notboxletters.com'
+        OR email LIKE '%@nolettersbox.com'
+        OR email LIKE '%@notlettersmail.com'
+        OR email LIKE '%@mailinator.com'
+        OR message LIKE '%Egjnjmfnefjwdifj%'
+        OR message LIKE '%YyErjcwdkdjwjjwjjdwjddjwsjf%'
+        OR name LIKE '%NARETGR%'
+        OR name LIKE '%Nikjhkjhk%'
+    ";
+}
+
+/**
  * Count spam inquiries matching bot patterns
  */
 function count_spam_inquiries($pdo)
 {
-    $where = "
-        message LIKE '%http://%'
-        OR message LIKE '%https://%'
-        OR message LIKE '%www.%'
-        OR message LIKE '%.buzz%'
-        OR message LIKE '%tinyurl.com%'
-        OR message LIKE '%peskartyhrt%'
-        OR message LIKE '%sekalubanik%'
-        OR message LIKE '%withdrawal operation%'
-        OR message LIKE '%account will be blocked%'
-        OR message LIKE '%AledyCeds%'
-        OR message LIKE '%перевод%'
-        OR message LIKE '%руб%'
-        OR message LIKE '%бонус%'
-        OR message LIKE '%приз%'
-        OR message LIKE '%подарок%'
-        OR message LIKE '%вознаграждение%'
-        OR message LIKE '%.ru/%'
-        OR email LIKE '%@notboxletters.com'
-        OR email LIKE '%@nolettersbox.com'
-        OR email LIKE '%@mailinator.com'
-    ";
+    $where = get_spam_where_clause();
 
     try {
         $sql = "SELECT COUNT(*) FROM inquiries WHERE (" . $where . ") 
@@ -201,28 +236,7 @@ function count_spam_inquiries($pdo)
  */
 function delete_spam_inquiries($pdo)
 {
-    $where = "
-        message LIKE '%http://%'
-        OR message LIKE '%https://%'
-        OR message LIKE '%www.%'
-        OR message LIKE '%.buzz%'
-        OR message LIKE '%tinyurl.com%'
-        OR message LIKE '%peskartyhrt%'
-        OR message LIKE '%sekalubanik%'
-        OR message LIKE '%withdrawal operation%'
-        OR message LIKE '%account will be blocked%'
-        OR message LIKE '%AledyCeds%'
-        OR message LIKE '%перевод%'
-        OR message LIKE '%руб%'
-        OR message LIKE '%бонус%'
-        OR message LIKE '%приз%'
-        OR message LIKE '%подарок%'
-        OR message LIKE '%вознаграждение%'
-        OR message LIKE '%.ru/%'
-        OR email LIKE '%@notboxletters.com'
-        OR email LIKE '%@nolettersbox.com'
-        OR email LIKE '%@mailinator.com'
-    ";
+    $where = get_spam_where_clause();
 
     try {
         $sql = "DELETE FROM inquiries WHERE (" . $where . ") 
