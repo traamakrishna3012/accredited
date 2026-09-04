@@ -5,6 +5,7 @@
  */
 
 require_once __DIR__ . '/includes/db.php';
+require_once __DIR__ . '/includes/anti_spam.php';
 
 $page_title = 'Contact Us';
 $page_description = 'Get in touch with Accredited Inspection Agency for Testing, Inspection and Certification services. Request a quote or inquiry today.';
@@ -15,8 +16,9 @@ $services = get_services($pdo);
 // Pre-select service if passed via URL
 $selected_service = isset($_GET['service']) ? (int) $_GET['service'] : '';
 
-// Generate CSRF token
+// Generate CSRF & anti-spam tokens
 $csrf_token = generate_csrf_token();
+$form_token = generate_form_token();
 
 include __DIR__ . '/includes/header.php';
 ?>
@@ -45,6 +47,14 @@ include __DIR__ . '/includes/header.php';
                     <form action="<?php echo BASE_URL; ?>/api/submit_inquiry.php" method="POST" class="needs-validation"
                         novalidate>
                         <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
+                        <input type="hidden" name="form_time" value="<?php echo $form_token; ?>">
+
+                        <!-- Honeypot Bot Trap (Invisible to real users) -->
+                        <div style="display: none !important; position: absolute !important; left: -9999px !important; opacity: 0 !important;" aria-hidden="true">
+                            <label for="website_url">Do not fill this field</label>
+                            <input type="text" name="website_url" id="website_url" tabindex="-1" autocomplete="off" value="">
+                            <input type="text" name="business_fax" id="business_fax" tabindex="-1" autocomplete="off" value="">
+                        </div>
 
                         <div class="row g-3">
                             <div class="col-md-6">

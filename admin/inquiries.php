@@ -21,6 +21,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $stmt = $pdo->prepare("DELETE FROM inquiries WHERE id = ?");
         $stmt->execute([$id]);
         set_flash_message('success', 'Inquiry deleted successfully.');
+    } elseif ($_POST['action'] === 'purge_spam') {
+        $deleted_count = delete_spam_inquiries($pdo);
+        set_flash_message('success', "Spam Cleanup Complete: Successfully purged " . number_format($deleted_count) . " spam bot inquiries.");
+        header('Location: inquiries.php');
+        exit;
     } elseif ($_POST['action'] === 'send_reply' && isset($_POST['id'])) {
         $id = (int) $_POST['id'];
         $reply_to_email = sanitize_input($_POST['reply_to']);
@@ -89,6 +94,7 @@ $total_inquiries = get_total_inquiries($pdo, $status_filter);
 $total_pages = ceil($total_inquiries / $limit);
 
 $inquiry_counts = get_inquiry_counts($pdo);
+$spam_count = count_spam_inquiries($pdo);
 
 // View single inquiry
 $view_inquiry = null;
@@ -141,6 +147,28 @@ if (isset($_GET['view'])) {
 
             <!-- Content -->
             <div class="p-4">
+                <?php if ($spam_count > 0 && !$view_inquiry): ?>
+                    <!-- Spam Detection Alert & Quick Purge -->
+                    <div class="alert alert-danger d-flex flex-wrap justify-content-between align-items-center shadow-sm mb-4">
+                        <div class="d-flex align-items-center mb-2 mb-md-0">
+                            <i class="bi bi-shield-slash-fill fs-2 text-danger me-3"></i>
+                            <div>
+                                <h6 class="mb-1 text-danger fw-bold">Bot Spam Detected (<?php echo number_format($spam_count); ?> spam inquiries)</h6>
+                                <p class="mb-0 small text-muted">
+                                    Spam bot inquiries (Russian Cyrillic text, phishing links, and fake domains) are detected in the database.
+                                    Purging will delete ONLY these spam records and preserve all genuine customer inquiries.
+                                </p>
+                            </div>
+                        </div>
+                        <form method="POST" onsubmit="return confirm('WARNING: You are about to permanently delete <?php echo number_format($spam_count); ?> spam bot inquiries.\n\nAll genuine inquiries will be preserved.\n\nDo you want to proceed?');">
+                            <input type="hidden" name="action" value="purge_spam">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash3-fill me-1"></i>Purge <?php echo number_format($spam_count); ?> Spam Inquiries
+                            </button>
+                        </form>
+                    </div>
+                <?php endif; ?>
+
                 <?php if ($view_inquiry): ?>
                     <!-- View Single Inquiry -->
                     <div class="card">

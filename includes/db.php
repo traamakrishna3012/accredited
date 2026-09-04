@@ -155,6 +155,90 @@ function get_inquiry_counts($pdo)
     return $stmt->fetch();
 }
 
+/**
+ * Count spam inquiries matching bot patterns
+ */
+function count_spam_inquiries($pdo)
+{
+    $where = "
+        message LIKE '%http://%'
+        OR message LIKE '%https://%'
+        OR message LIKE '%www.%'
+        OR message LIKE '%.buzz%'
+        OR message LIKE '%tinyurl.com%'
+        OR message LIKE '%peskartyhrt%'
+        OR message LIKE '%sekalubanik%'
+        OR message LIKE '%withdrawal operation%'
+        OR message LIKE '%account will be blocked%'
+        OR message LIKE '%AledyCeds%'
+        OR message LIKE '%перевод%'
+        OR message LIKE '%руб%'
+        OR message LIKE '%бонус%'
+        OR message LIKE '%приз%'
+        OR message LIKE '%подарок%'
+        OR message LIKE '%вознаграждение%'
+        OR message LIKE '%.ru/%'
+        OR email LIKE '%@notboxletters.com'
+        OR email LIKE '%@nolettersbox.com'
+        OR email LIKE '%@mailinator.com'
+    ";
+
+    try {
+        $sql = "SELECT COUNT(*) FROM inquiries WHERE (" . $where . ") 
+            OR message REGEXP '[\\x{0400}-\\x{04FF}]' 
+            OR name REGEXP '[\\x{0400}-\\x{04FF}]'";
+        $stmt = $pdo->query($sql);
+        return (int) $stmt->fetchColumn();
+    } catch (Exception $e) {
+        $sql = "SELECT COUNT(*) FROM inquiries WHERE " . $where;
+        $stmt = $pdo->query($sql);
+        return (int) $stmt->fetchColumn();
+    }
+}
+
+/**
+ * Delete spam inquiries in bulk
+ */
+function delete_spam_inquiries($pdo)
+{
+    $where = "
+        message LIKE '%http://%'
+        OR message LIKE '%https://%'
+        OR message LIKE '%www.%'
+        OR message LIKE '%.buzz%'
+        OR message LIKE '%tinyurl.com%'
+        OR message LIKE '%peskartyhrt%'
+        OR message LIKE '%sekalubanik%'
+        OR message LIKE '%withdrawal operation%'
+        OR message LIKE '%account will be blocked%'
+        OR message LIKE '%AledyCeds%'
+        OR message LIKE '%перевод%'
+        OR message LIKE '%руб%'
+        OR message LIKE '%бонус%'
+        OR message LIKE '%приз%'
+        OR message LIKE '%подарок%'
+        OR message LIKE '%вознаграждение%'
+        OR message LIKE '%.ru/%'
+        OR email LIKE '%@notboxletters.com'
+        OR email LIKE '%@nolettersbox.com'
+        OR email LIKE '%@mailinator.com'
+    ";
+
+    try {
+        $sql = "DELETE FROM inquiries WHERE (" . $where . ") 
+            OR message REGEXP '[\\x{0400}-\\x{04FF}]' 
+            OR name REGEXP '[\\x{0400}-\\x{04FF}]'";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute();
+        return $stmt->rowCount();
+    } catch (Exception $e) {
+        $sql = "DELETE FROM inquiries WHERE " . $where;
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute();
+        return $stmt->rowCount();
+    }
+}
+
 function authenticate_admin($pdo, $username, $password)
 {
     $stmt = $pdo->prepare("SELECT * FROM admin_users WHERE username = ?");

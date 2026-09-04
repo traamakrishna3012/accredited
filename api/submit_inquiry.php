@@ -5,6 +5,7 @@
  */
 
 require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/anti_spam.php';
 
 // Only accept POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -15,7 +16,30 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // Verify CSRF token
 if (!isset($_POST['csrf_token']) || !verify_csrf_token($_POST['csrf_token'])) {
-    set_flash_message('error', 'Invalid request. Please try again.');
+    set_flash_message('error', 'Invalid request session. Please refresh and try again.');
+    header('Location: ' . BASE_URL . '/contact.php');
+    exit;
+}
+
+// -------------------------------------------------------------
+// Multi-Layer Anti-Spam & Bot Detection
+// -------------------------------------------------------------
+$spam_reason = '';
+if (is_spam_inquiry($_POST, $spam_reason)) {
+    // Log blocked spam attempt
+    error_log(sprintf(
+        "[SPAM BLOCKED] %s | IP: %s | Name: %s | Email: %s",
+        $spam_reason,
+        get_client_ip(),
+        $_POST['name'] ?? '',
+        $_POST['email'] ?? ''
+    ));
+
+    // SILENT DROP / FAKE SUCCESS:
+    // Do NOT send any email (safeguarding OCI monthly mail limit)
+    // Do NOT insert into database (preventing database pollution)
+    // Return fake success so bots do not retry with other vectors
+    set_flash_message('success', 'Thank you for your inquiry! We will get back to you soon.');
     header('Location: ' . BASE_URL . '/contact.php');
     exit;
 }
@@ -42,19 +66,11 @@ if (empty($email)) {
 
 if (empty($message)) {
     $errors[] = 'Message is required.';
-} else {
-    // Spam filtering
-    if (preg_match('/(http:\/\/|https:\/\/|www\.)/i', $message)) {
-        $errors[] = 'Messages containing links are not allowed for security reasons.';
-    }
-    if (preg_match('/(jackpot|casino|lottery|crypto|bitcoin|serial number id)/i', $message)) {
-        $errors[] = 'Your message contains blocked keywords and has been rejected.';
-    }
 }
 
 // Phone validation (optional but must be valid if provided)
-if (!empty($phone) && !preg_match('/^[0-9]{10}$/', $phone)) {
-    $errors[] = 'Please enter a valid 10-digit phone number.';
+if (!empty($phone) && !preg_match('/^[0-9+\s\-]{7,15}$/', $phone)) {
+    $errors[] = 'Please enter a valid phone number.';
 }
 
 // If errors, redirect back
@@ -65,7 +81,7 @@ if (!empty($errors)) {
 }
 
 try {
-    // Save inquiry to database
+    // Save clean inquiry to database
     $data = [
         'name' => $name,
         'email' => $email,
@@ -90,42 +106,43 @@ try {
         if (SMTP_USER !== 'your-email@gmail.com') {
             require_once __DIR__ . '/send_email.php';
 
-            // Send confirmation to user
-            $user_subject = 'Thank you for contacting Accredited Inspection Agency';
-            $user_body = "
+            // Send notification to admin ONLY (Preserving OCI monthly quota & avoiding bounce backscatter)
+            $admin_subject = 'New Inquiry: ' . $service_name . ' from ' . $name;
+            $admin_body = "
+<h3>New Customer Inquiry Received</h3>
+<p><strong>Name:</strong> " . htmlspecialchars($name) . "</p>
+<p><strong>Email:</strong> " . htmlspecialchars($email) . "</p>
+<p><strong>Phone:</strong> " . htmlspecialchars($phone ?: 'Not provided') . "</p>
+<p><strong>Service:</strong> " . htmlspecialchars($service_name) . "</p>
+<p><strong>Message:</strong></p>
+<div style='background:#f4f4f4; padding:15px; border-left:4px solid #1a365d; margin:10px 0;'>
+" . nl2br(htmlspecialchars($message)) . "
+</div>
+<hr>
+<p><a href='" . BASE_URL . "/admin/inquiries.php'>Click here to view all inquiries in Admin Panel</a></p>
+";
+            send_email(ADMIN_EMAIL, 'Admin', $admin_subject, $admin_body, true);
+
+            // Optional auto-reply to customer (Only if enabled, to protect OCI monthly limit)
+            if (defined('ENABLE_INQUIRY_AUTO_REPLY') && ENABLE_INQUIRY_AUTO_REPLY === true) {
+                $user_subject = 'Thank you for contacting Accredited Inspection Agency';
+                $user_body = "
 Dear {$name},
 
-Thank you for reaching out to Accredited Inspection Agency. We have received your inquiry and will get back to you shortly.
+Thank you for reaching out to Accredited Inspection Agency. We have received your inquiry and our team will get back to you shortly.
 
 Your Inquiry Details:
 - Service: {$service_name}
 - Message: {$message}
 
-If you have any urgent questions, please don't hesitate to call us at " . SITE_PHONE . ".
+If you have any urgent questions, please feel free to call us at " . SITE_PHONE . ".
 
 Best regards,
 Accredited Inspection Agency
 " . SITE_ADDRESS . "
 ";
-            send_email($email, $name, $user_subject, $user_body);
-
-            // Send notification to admin
-            $admin_subject = 'New Inquiry: ' . $service_name;
-            $admin_body = "
-New inquiry received from the website:
-
-Name: {$name}
-Email: {$email}
-Phone: {$phone}
-Service: {$service_name}
-
-Message:
-{$message}
-
----
-View all inquiries at: " . BASE_URL . "/admin/inquiries.php
-";
-            send_email(ADMIN_EMAIL, 'Admin', $admin_subject, $admin_body);
+                send_email($email, $name, $user_subject, $user_body);
+            }
         }
 
         set_flash_message('success', 'Thank you for your inquiry! We will get back to you soon.');
